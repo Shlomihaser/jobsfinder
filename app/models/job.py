@@ -31,7 +31,8 @@ class Job(Base):
     url: Mapped[str] = mapped_column(String, nullable=False)
     
     raw_data: Mapped[dict] = mapped_column(JSONB, nullable=False)
-
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    
     published_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
