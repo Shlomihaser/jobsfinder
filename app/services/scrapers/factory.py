@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Dict, Any
 from app.models.company import ATSProvider, Company
 from app.services.scrapers.base import BaseScraper
 from app.services.scrapers.commet_scraper import ComeetScraper
@@ -22,3 +22,10 @@ class ScraperFactory:
             raise FatalProviderError(f"No scraper implemented for ATS: {company.ats_provider}")
 
         return scraper_cls(company.name, company.metadata_config)
+
+    @classmethod
+    async def validate_provider_config(cls, ats_provider: ATSProvider, config: Dict[str, Any]) -> bool:
+        scraper_cls = cls._registry.get(ats_provider)
+        if not scraper_cls:
+            return False
+        return await scraper_cls.validate_config(config)

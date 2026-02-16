@@ -15,17 +15,23 @@ class ATSProvider(str, enum.Enum):
     LEVER = "LEVER"
     API_CUSTOM = "API_CUSTOM"
 
+class CompanyStatus(str, enum.Enum):
+    UNCONFIGURED = "UNCONFIGURED"
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    ERROR = "ERROR"
+
 class Company(Base):
     __tablename__ = "companies"
 
     id: Mapped[UUID] = mapped_column(default=uuid4, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
-    career_page_url: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    career_page_url: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
     
     ats_identifier: Mapped[str | None] = mapped_column(String, nullable=True)
     ats_provider: Mapped[ATSProvider | None] = mapped_column(SQLEnum(ATSProvider), nullable=True)
     
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    status: Mapped[CompanyStatus] = mapped_column(SQLEnum(CompanyStatus), default=CompanyStatus.UNCONFIGURED)
     last_scanned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     
     metadata_config: Mapped[dict] = mapped_column(JSONB, default={}) 

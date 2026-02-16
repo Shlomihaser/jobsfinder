@@ -28,6 +28,7 @@ class Job(Base):
     
     title: Mapped[str] = mapped_column(String, index=True)
     location: Mapped[str | None] = mapped_column(String, nullable=True)
+    city: Mapped[str | None] = mapped_column(String, nullable=True)
     url: Mapped[str] = mapped_column(String, nullable=False)
     
     raw_data: Mapped[dict] = mapped_column(JSONB, nullable=False)

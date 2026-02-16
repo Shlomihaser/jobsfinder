@@ -8,6 +8,7 @@ class JobSchema(BaseModel):
     external_id: str
     url: str
     location: str | None = None
+    city: str | None = None
     published_at: datetime | None = None
     description: str | None = None
     raw_data: Dict[str, Any]

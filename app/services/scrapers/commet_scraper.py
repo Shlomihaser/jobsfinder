@@ -15,6 +15,26 @@ class ComeetScraper(BaseScraper):
         self.uid = config.get("uid")
         self.token = config.get("token")
 
+    @staticmethod
+    async def validate_config(config: Dict[str, Any]) -> bool:
+        uid = config.get("uid")
+        token = config.get("token")
+        if not uid or not token:
+            return False
+            
+        try:
+            # Use minimal request to verify credentials
+            url = f"https://www.comeet.co/careers-api/2.0/company/{uid}/positions?token={token}&details=false&limit=1"
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                resp = await client.get(url)
+                if resp.status_code == 200:
+                    return True
+                logger.warning(f"Comeet Validation Failed: {resp.status_code} {resp.text}")
+                return False
+        except Exception as e:
+            logger.error(f"Comeet Validation Error: {e}")
+            return False
+
     async def fetch_jobs(self) -> List[JobSchema]:
         """
         Fetches all jobs from Comeet API in a single request.
@@ -54,12 +74,13 @@ class ComeetScraper(BaseScraper):
                 description_html = self._parse_details(job_data.get("details", []))
 
                 schema = JobSchema(
-                    title=job_data.get("name"),
-                    external_id=job_data.get("uid"),
-                    url=job_data.get("url_active_page"),
-                    location=job_data.get("location", {}).get("country"),
+                    title=job_data.get("name") or None,
+                    external_id=job_data.get("uid") or None,
+                    url=job_data.get("url_active_page") or None,
+                    location=job_data.get("location", {}).get("country") or None,
+                    city=job_data.get("location", {}).get("city") or None,
                     description=description_html,
-                    published_at=job_data.get("time_updated"),
+                    published_at=job_data.get("time_updated") or None,
                     raw_data=job_data
                 )
                 valid_jobs.append(schema)
