@@ -6,3 +6,5 @@ __pycache__/
 
 scripts/
 scripts/test_scraper.py
+
+.pytest_cache/

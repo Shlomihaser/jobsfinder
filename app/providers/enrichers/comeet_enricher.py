@@ -2,7 +2,7 @@ import re
 import asyncio
 import httpx
 from typing import Optional
-from ddgs import DDGS
+from duckduckgo_search import DDGS
 from loguru import logger
 
 from app.models.company import Company, ATSProvider
