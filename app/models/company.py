@@ -2,7 +2,7 @@ import enum
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, String, func
+from sqlalchemy import DateTime, Enum as SQLEnum, String, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -27,8 +27,6 @@ class Company(Base):
     id: Mapped[UUID] = mapped_column(default=uuid4, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     career_page_url: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
-    
-    ats_identifier: Mapped[str | None] = mapped_column(String, nullable=True)
     ats_provider: Mapped[ATSProvider | None] = mapped_column(SQLEnum(ATSProvider), nullable=True)
     
     status: Mapped[CompanyStatus] = mapped_column(SQLEnum(CompanyStatus), default=CompanyStatus.UNCONFIGURED)

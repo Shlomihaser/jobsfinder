@@ -3,7 +3,7 @@ from typing import Dict, Any, List, Optional
 from loguru import logger
 
 from app.schemas.job import JobSchema
-from app.services.scrapers.base import BaseScraper
+from app.providers.scrapers.base import BaseScraper
 
 from app.core.exceptions import RetryableProviderError, FatalProviderError, ProviderError
 
@@ -23,7 +23,6 @@ class ComeetScraper(BaseScraper):
             return False
             
         try:
-            # Use minimal request to verify credentials
             url = f"https://www.comeet.co/careers-api/2.0/company/{uid}/positions?token={token}&details=false&limit=1"
             async with httpx.AsyncClient(timeout=5.0) as client:
                 resp = await client.get(url)

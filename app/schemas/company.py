@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 from typing import Dict, Any, Optional
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, field_validator
 
 from app.models.company import ATSProvider, CompanyStatus
 
@@ -11,6 +11,13 @@ class CompanyBase(BaseModel):
     ats_provider: Optional[ATSProvider] = None
     metadata_config: Dict[str, Any] = {}
     status: Optional[CompanyStatus] = CompanyStatus.UNCONFIGURED
+
+    @field_validator("status")
+    @classmethod
+    def status_not_error(cls, v):
+        if v == CompanyStatus.ERROR:
+            raise ValueError("ERROR is a system-managed status. Use INACTIVE to pause scraping.")
+        return v
 
 class CompanyCreate(CompanyBase):
     pass

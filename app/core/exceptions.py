@@ -13,3 +13,15 @@ class RetryableProviderError(ProviderError):
 class FatalProviderError(ProviderError):
     """Permanent issues (404, 403, Bad Config)"""
     pass
+
+class CompanyAlreadyExistsError(JobFinderError):
+    """Raised when a company already exists."""
+    pass
+
+class CompanyNotFoundError(JobFinderError):
+    """Raised when a company is not found."""
+    pass
+
+class CompanyValidationError(JobFinderError):
+    """Raised when a company status transition is invalid."""
+    pass

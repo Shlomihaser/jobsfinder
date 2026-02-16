@@ -1,7 +1,7 @@
 from typing import Type, Dict, Any
 from app.models.company import ATSProvider, Company
-from app.services.scrapers.base import BaseScraper
-from app.services.scrapers.commet_scraper import ComeetScraper
+from app.providers.scrapers.base import BaseScraper
+from app.providers.scrapers.comeet_scraper import ComeetScraper
 from app.core.exceptions import FatalProviderError
 
 class ScraperFactory:
