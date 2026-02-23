@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.company import Company
 from app.services.company_service import get_company_by_id, update_company
 from app.providers.enrichers.factory import EnricherFactory
+from app.core.exceptions import EnrichmentRateLimitError
 
 async def run_enrichment_for_company(db: AsyncSession, company_id: UUID) -> Company:
     """
@@ -26,6 +27,8 @@ async def run_enrichment_for_company(db: AsyncSession, company_id: UUID) -> Comp
     
     try:
         update_data = await enricher.enrich(company)
+    except EnrichmentRateLimitError:
+        raise
     except Exception as e:
         logger.error(f"Enrichment failed for {company.name}: {e}")
         return company

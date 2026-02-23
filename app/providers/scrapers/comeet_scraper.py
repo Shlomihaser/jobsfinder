@@ -15,24 +15,41 @@ class ComeetScraper(BaseScraper):
         self.uid = config.get("uid")
         self.token = config.get("token")
 
-    @staticmethod
-    async def validate_config(config: Dict[str, Any]) -> bool:
+    @classmethod
+    async def is_valid_config(cls, config: Dict[str, Any]) -> bool:
         uid = config.get("uid")
         token = config.get("token")
-        if not uid or not token:
-            return False
+        
+        if not uid or not token: return False
             
+        url = f"{cls.BASE_URL}/{uid}/positions"
+        params = {
+            "token": token,
+            "details": "false",
+            "limit": 1
+        }
+
         try:
-            url = f"https://www.comeet.co/careers-api/2.0/company/{uid}/positions?token={token}&details=false&limit=1"
             async with httpx.AsyncClient(timeout=5.0) as client:
-                resp = await client.get(url)
-                if resp.status_code == 200:
-                    return True
-                logger.warning(f"Comeet Validation Failed: {resp.status_code} {resp.text}")
+                resp = await client.get(url, params=params)
+                resp.raise_for_status() 
+                return True
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code in [403, 404]:
+                logger.warning(f"Comeet Validation Failed: {e.response.status_code} - Invalid Config")
                 return False
+            
+            logger.error(f"Comeet API Error during validation: {e}")
+            raise RetryableProviderError(f"API Error during validation: {e}", provider="Comeet")
+            
+        except httpx.RequestError as e:
+            logger.error(f"Network error during Comeet validation: {e}")
+            raise RetryableProviderError(f"Network error validating config: {e}", provider="Comeet")
+            
         except Exception as e:
-            logger.error(f"Comeet Validation Error: {e}")
-            return False
+            logger.error(f"Unexpected error during Comeet validation: {e}")
+            raise ProviderError(f"Unexpected validation error: {e}", provider="Comeet")
+
 
     async def fetch_jobs(self) -> List[JobSchema]:
         """
@@ -42,11 +59,12 @@ class ComeetScraper(BaseScraper):
             logger.error(f"Missing uid or token for company {self.company_name}")
             return []
 
-        url = f"{self.BASE_URL}/{self.uid}/positions?token={self.token}&details=true"
-        
+        url = f"{self.BASE_URL}/{self.uid}/positions"
+        params = { "token": self.token, "details": "true" }
+
         async with httpx.AsyncClient(timeout=10.0) as client:
             try:
-                resp = await client.get(url)
+                resp = await client.get(url, params=params)
                 resp.raise_for_status()
                 jobs_data = resp.json()
             except httpx.HTTPStatusError as e:
@@ -66,36 +84,35 @@ class ComeetScraper(BaseScraper):
 
         return self._parse_jobs(jobs_data)
 
-    def _parse_jobs(self, jobs_list: List[Dict[str, Any]]) -> List[JobSchema]:
-        valid_jobs = []
-        for job_data in jobs_list:
+    def _parse_jobs(self, jobs: List[Dict[str, Any]]) -> List[JobSchema]:
+        parsed_jobs = []
+        for job in jobs:
             try:
-                description_html = self._parse_details(job_data.get("details", []))
+                description_html = self._parse_details(job.get("details", []))
 
                 schema = JobSchema(
-                    title=job_data.get("name") or None,
-                    external_id=job_data.get("uid") or None,
-                    url=job_data.get("url_active_page") or None,
-                    location=job_data.get("location", {}).get("country") or None,
-                    city=job_data.get("location", {}).get("city") or None,
+                    title=job.get("name"),
+                    external_id=job.get("uid"),
+                    url=job.get("url_active_page"),
+                    location=job.get("location", {}).get("country"),
+                    city=job.get("location", {}).get("city"),
                     description=description_html,
-                    published_at=job_data.get("time_updated") or None,
-                    raw_data=job_data
+                    published_at=job.get("time_updated"),
+                    raw_data=job
                 )
-                valid_jobs.append(schema)
+                parsed_jobs.append(schema)
             except Exception as e:
-                logger.warning(f"Skipping malformed job {job_data.get('uid')}: {e}")
+                logger.warning(f"Skipping malformed job {job.get('uid')}: {e}")
 
-        logger.info(f"Successfully parsed {len(valid_jobs)} jobs for {self.company_name}")
-        return valid_jobs
+        logger.info(f"Successfully parsed {len(parsed_jobs)} jobs for {self.company_name}")
+        return parsed_jobs
 
     def _parse_details(self, details: List[Dict[str, Any]]) -> Optional[str]:
         """
         Concatenates all detail sections (Description, Requirements, etc.)
         Job.details is a list: [{'name': 'Description', 'value': 'HTML', 'order': 1}, ...]
         """
-        if not details:
-            return None
+        if not details: return 
     
         sorted_details = sorted(details, key=lambda x: x.get("order", 0))
         

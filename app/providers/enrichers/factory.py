@@ -15,5 +15,5 @@ class EnricherFactory:
     def get_enricher(cls, provider: ATSProvider) -> Optional[BaseEnricher]:
         enricher_cls = cls._registry.get(provider)
         if not enricher_cls:
-            return None
+            return
         return enricher_cls()

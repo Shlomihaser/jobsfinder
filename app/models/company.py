@@ -27,6 +27,7 @@ class Company(Base):
     id: Mapped[UUID] = mapped_column(default=uuid4, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
     career_page_url: Mapped[str | None] = mapped_column(String, unique=True, nullable=True)
+    logo_url: Mapped[str | None] = mapped_column(String, nullable=True)
     ats_provider: Mapped[ATSProvider | None] = mapped_column(SQLEnum(ATSProvider), nullable=True)
     
     status: Mapped[CompanyStatus] = mapped_column(SQLEnum(CompanyStatus), default=CompanyStatus.UNCONFIGURED)

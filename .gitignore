@@ -8,3 +8,8 @@ scripts/
 scripts/test_scraper.py
 
 .pytest_cache/
+
+.vscode/
+
+companies-*.json
+companies.json

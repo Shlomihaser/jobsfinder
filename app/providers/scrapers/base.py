@@ -9,11 +9,11 @@ class BaseScraper(ABC):
         self.company_name = company_name
         self.config = config
 
-    @staticmethod
-    async def validate_config(config: Dict[str, Any]) -> bool:
-        """Override this to validate provider-specific config."""
-        return False
+    @classmethod
+    @abstractmethod
+    async def is_valid_config(cls, config: Dict[str, Any]) -> bool: 
+        pass
 
     @abstractmethod
-    async def fetch_jobs(self) -> List[JobSchema]:
+    async def fetch_jobs(self) -> List[JobSchema]: 
         pass

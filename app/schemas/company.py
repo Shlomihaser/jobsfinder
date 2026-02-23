@@ -8,6 +8,7 @@ from app.models.company import ATSProvider, CompanyStatus
 class CompanyBase(BaseModel):
     name: str
     career_page_url: Optional[str] = None
+    logo_url: Optional[str] = None
     ats_provider: Optional[ATSProvider] = None
     metadata_config: Dict[str, Any] = {}
     status: Optional[CompanyStatus] = CompanyStatus.UNCONFIGURED
@@ -20,11 +21,12 @@ class CompanyBase(BaseModel):
         return v
 
 class CompanyCreate(CompanyBase):
-    pass
+    status: Optional[CompanyStatus] = None
 
 class CompanyUpdate(CompanyBase):
     name: Optional[str] = None
     career_page_url: Optional[str] = None
+    logo_url: Optional[str] = None
     ats_provider: Optional[ATSProvider] = None
     metadata_config: Optional[Dict[str, Any]] = None
     status: Optional[CompanyStatus] = None

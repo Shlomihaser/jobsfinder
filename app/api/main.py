@@ -1,10 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
 
 from app.core.config import settings
 from app.api.controllers import company_controller
 from app.api.exception_handlers import register_exception_handlers
+from app import models
 
+
+import sys
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

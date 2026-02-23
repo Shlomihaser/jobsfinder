@@ -2,11 +2,13 @@ from typing import Type, Dict, Any
 from app.models.company import ATSProvider, Company
 from app.providers.scrapers.base import BaseScraper
 from app.providers.scrapers.comeet_scraper import ComeetScraper
+from app.providers.scrapers.workday_scraper import WorkdayScraper
 from app.core.exceptions import FatalProviderError
 
 class ScraperFactory:
     _registry = {
         ATSProvider.COMEET: ComeetScraper,
+        ATSProvider.WORKDAY: WorkdayScraper,
     }
 
     @classmethod
@@ -28,4 +30,4 @@ class ScraperFactory:
         scraper_cls = cls._registry.get(ats_provider)
         if not scraper_cls:
             return False
-        return await scraper_cls.validate_config(config)
+        return await scraper_cls.is_valid_config(config)

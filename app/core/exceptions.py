@@ -14,6 +14,18 @@ class FatalProviderError(ProviderError):
     """Permanent issues (404, 403, Bad Config)"""
     pass
 
+class EnrichmentError(JobFinderError):
+    """Base class for enrichment errors"""
+    pass
+
+class EnrichmentRateLimitError(EnrichmentError):
+    """Raised when an external service rate limits the request"""
+    pass
+
+class EnrichmentNotFoundError(EnrichmentError):
+    """Raised when data cannot be found"""
+    pass
+
 class CompanyAlreadyExistsError(JobFinderError):
     """Raised when a company already exists."""
     pass

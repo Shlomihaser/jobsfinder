@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 
 from app.models.company import Company, ATSProvider
 from app.models.job import Job
-from app.providers.enrichers.comeet_enricher import ComeetEnricher
+from app.providers.enrichers.comeet_enricher2 import ComeetEnricher
 from app.schemas.company import CompanyUpdate
 
 @pytest.fixture
@@ -24,7 +24,12 @@ async def test_enrich_full_success(enricher, company, mock_httpx_response):
         
         # Mock Career Page Fetch
         with patch("httpx.AsyncClient.get", new_callable=AsyncMock) as mock_get:
-            token_html = """<html><script>company.token = 'XYZ-TOKEN';</script></html>"""
+            token_html = """
+            <html>
+                <script>company.token = 'XYZ-TOKEN';</script>
+                <meta property="og:image" content="https://logo.com/logo.png">
+            </html>
+            """
             mock_get.return_value = mock_httpx_response(
                 200, 
                 text=token_html,
@@ -37,6 +42,7 @@ async def test_enrich_full_success(enricher, company, mock_httpx_response):
             assert result.metadata_config["uid"] == "12.ABC"
             assert result.metadata_config["token"] == "XYZ-TOKEN"
             assert result.career_page_url == "https://www.comeet.com/jobs/testcorp/12.ABC"
+            assert result.logo_url == "https://logo.com/logo.png"
 
 
 @pytest.mark.asyncio
@@ -92,5 +98,6 @@ async def test_enrich_uid_but_no_token(enricher, company, mock_httpx_response):
 async def test_enrich_skip_if_complete(enricher, company):
     """Should skip if company already has UID and Token"""
     company.metadata_config = {"uid": "EXISTS", "token": "EXISTS"}
+    company.logo_url = "EXISTS"
     result = await enricher.enrich(company)
     assert result is None

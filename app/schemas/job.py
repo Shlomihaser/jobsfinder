@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from datetime import datetime
 from typing import Any, Dict
 
@@ -12,3 +13,10 @@ class JobSchema(BaseModel):
     published_at: datetime | None = None
     description: str | None = None
     raw_data: Dict[str, Any]
+
+    @field_validator('*', mode='before')
+    @classmethod
+    def empty_string_to_none(cls, v):
+        if v == "":
+            return None
+        return v

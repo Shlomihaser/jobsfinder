@@ -89,6 +89,7 @@ async def create_company(db: AsyncSession, company_in: CompanyCreate) -> Company
         career_page_url=company_in.career_page_url,
         ats_provider=company_in.ats_provider,
         metadata_config=company_in.metadata_config,
+        logo_url=company_in.logo_url,
         status=final_status,
     )
     return await company_repo.create(db, db_company)
@@ -105,6 +106,8 @@ async def update_company(db: AsyncSession, company_id: UUID, company_in: Company
         company.ats_provider = company_in.ats_provider
     if company_in.metadata_config is not None:
         company.metadata_config = company_in.metadata_config
+    if company_in.logo_url is not None:
+        company.logo_url = company_in.logo_url
 
     is_valid = await _check_config_validity(company.ats_provider, company.metadata_config)
     company.status = await _resolve_status(company.status, company_in.status, is_valid)
