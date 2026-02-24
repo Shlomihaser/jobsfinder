@@ -13,6 +13,7 @@ class ATSProvider(str, enum.Enum):
     COMEET = "COMEET"
     WORKDAY = "WORKDAY"
     LEVER = "LEVER"
+    WORKABLE = "WORKABLE"
     API_CUSTOM = "API_CUSTOM"
 
 class CompanyStatus(str, enum.Enum):

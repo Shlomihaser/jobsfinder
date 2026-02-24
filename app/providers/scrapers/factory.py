@@ -3,12 +3,14 @@ from app.models.company import ATSProvider, Company
 from app.providers.scrapers.base import BaseScraper
 from app.providers.scrapers.comeet_scraper import ComeetScraper
 from app.providers.scrapers.workday_scraper import WorkdayScraper
+from app.providers.scrapers.workable_scraper import WorkableScraper
 from app.core.exceptions import FatalProviderError
 
 class ScraperFactory:
     _registry = {
         ATSProvider.COMEET: ComeetScraper,
         ATSProvider.WORKDAY: WorkdayScraper,
+        ATSProvider.WORKABLE: WorkableScraper,
     }
 
     @classmethod
