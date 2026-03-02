@@ -67,16 +67,6 @@ class WorkableScraper(BaseScraper):
             "Accept": "application/json, text/plain, */*",
             "Origin": "https://apply.workable.com"
         }
-        
-        # We fetch only jobs in Israel as per the payload, or we can fetch all and filter later.
-        # The user's prompt indicated we should do the POST request for jobs.
-        # We'll pass the Israel location filter as in validation, or empty to get all jobs.
-        # Wait, the prompt said: "we need to do the validate also and i think this should be to the first request i gave u"
-        # Since this is a specialized scraper, filtering to Israel makes sense if it's an Israeli jobs board. 
-        # I will fetch all jobs, the payload could be empty, but let's just mimic the normal `{}` payload or no filter payload, 
-        # actually let's just pass the filter for Israel to get relevant jobs, or just a generic `{}` to get all, and we map them.
-        # User said "i saw your note and we can add this to location: {country: "Israel", countryCode: "IL"}"
-        # So I will include the payload for the list fetch as well.
         payload = {"location": [{"country": "Israel", "countryCode": "IL"}]}
 
         async with httpx.AsyncClient(timeout=30.0, headers=headers) as client:
@@ -95,7 +85,7 @@ class WorkableScraper(BaseScraper):
                 
                 logger.info(f"[{self.company_name}] Discovered {total} total jobs in search. Processing details...")
                 
-                semaphore = asyncio.Semaphore(10)
+                semaphore = asyncio.Semaphore(5)
                 
                 async def fetch_job_detail(job_summary):
                     shortcode = job_summary.get("shortcode")
@@ -118,7 +108,7 @@ class WorkableScraper(BaseScraper):
                             requirements_html = detail_data.get("requirements", "")
                             benefits_html = detail_data.get("benefits", "")
                             
-                            # Combine HTML sections nicely
+                            
                             full_description = ""
                             if description_html:
                                 full_description += f"<h4>Description</h4>{description_html}"
@@ -131,7 +121,6 @@ class WorkableScraper(BaseScraper):
                             city = location_data.get("city")
                             country = location_data.get("country")
 
-                            # Workable provides the direct job link in many cases, but if not we can construct it
                             external_url = f"https://apply.workable.com/{slug}/j/{shortcode}/"
                             
                             return JobSchema(
